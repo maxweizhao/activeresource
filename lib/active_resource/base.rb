@@ -600,8 +600,9 @@ module ActiveResource
         end
       end
 
-      def headers
+      def headers(options = {})
         @headers ||= {}
+        @headers = @headers.merge(options)
 
         if superclass != Object && superclass.headers
           @headers = superclass.headers.merge(@headers)
@@ -1038,6 +1039,7 @@ module ActiveResource
         end
     end
 
+    attr_accessor :headers #:nodoc:
     attr_accessor :attributes #:nodoc:
     attr_accessor :prefix_options #:nodoc:
 
@@ -1069,6 +1071,7 @@ module ActiveResource
     #   my_other_course.save
     def initialize(attributes = {}, persisted = false)
       @attributes     = {}.with_indifferent_access
+      @headers = {}
       @prefix_options = {}
       @persisted = persisted
       load(attributes, false, persisted)
@@ -1256,7 +1259,7 @@ module ActiveResource
     #   Person.find(new_id) # 404 (Resource Not Found)
     def destroy
       run_callbacks :destroy do
-        connection.delete(element_path, self.class.headers)
+        connection.delete(element_path, self.class.headers(self.headers))
       end
     end
 
@@ -1423,7 +1426,7 @@ module ActiveResource
       # Update the resource on the remote service.
       def update
         run_callbacks :update do
-          connection.put(element_path(prefix_options), encode, self.class.headers).tap do |response|
+          connection.put(element_path(prefix_options), encode, self.class.headers(self.headers)).tap do |response|
             load_attributes_from_response(response)
           end
         end
@@ -1432,7 +1435,7 @@ module ActiveResource
       # Create (i.e., \save to the remote service) the \new resource.
       def create
         run_callbacks :create do
-          connection.post(collection_path, encode, self.class.headers).tap do |response|
+          connection.post(collection_path, encode, self.class.headers(self.headers)).tap do |response|
             self.id = id_from_response(response)
             load_attributes_from_response(response)
           end
