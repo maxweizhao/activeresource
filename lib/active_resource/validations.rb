@@ -36,7 +36,8 @@ module ActiveResource
       messages.each do |(key,errors)|
         errors.each do |error|
           if @base.attributes.keys.include?(key)
-            add key, error
+            add key, I18n.t("activemodel.errors.models.#{@base}.attributes.#{key}.#{error}",
+                            :default => I18n.t("activemodel.errors.messages.#{error}", :default => error))
           elsif key == 'base'
             self[:base] << error
           else
