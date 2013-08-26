@@ -1032,12 +1032,10 @@ module ActiveResource
 
           (options || {}).each do |key, value|
             next if key.blank? || !key.respond_to?(:to_sym)
-            if prefix_parameters.include?(key.to_sym)
-              prefix_options[key.to_sym] = value
-            end
+            (prefix_parameters.include?(key.to_sym) ? prefix_options : query_options)[key.to_sym] = value
           end
 
-          [prefix_options, options]
+          [ prefix_options, query_options ]
         end
     end
 
@@ -1337,6 +1335,10 @@ module ActiveResource
       end
 
       attributes = Formats.remove_root(attributes) if remove_root
+
+      @prefix_options.each do |key, value|
+        @attributes[key.to_s] = value
+      end
 
       attributes.each do |key, value|
         @attributes[key.to_s] =
