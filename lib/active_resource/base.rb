@@ -1032,10 +1032,12 @@ module ActiveResource
 
           (options || {}).each do |key, value|
             next if key.blank? || !key.respond_to?(:to_sym)
-            (prefix_parameters.include?(key.to_sym) ? prefix_options : query_options)[key.to_sym] = value
+            if prefix_parameters.include?(key.to_sym)
+              prefix_options[key.to_sym] = value
+            end
           end
 
-          [ prefix_options, query_options ]
+          [prefix_options, options]
         end
     end
 
